@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5f7">
+  <title>TwoTone — Quick Call II analyzer</title>
+  <style>
+    :root{--ink:#20242c;--muted:#78808d;--line:#e7e9ee;--paper:#fff;--bg:#f4f5f7;--blue:#3667e8;--blue-2:#eef3ff;--orange:#ed8b49;--green:#2b9873;--shadow:0 10px 36px rgba(32,43,69,.055)}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+    button,input{font:inherit}
+    .shell{max-width:1120px;margin:0 auto;padding:0 34px 54px}
+    header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb}
+    .brand{display:flex;align-items:center;gap:11px;font:800 16px Inter,'Segoe UI',sans-serif;letter-spacing:-.5px}
+    .brand-icon{width:30px;height:30px;border-radius:9px;background:#202c48;display:grid;place-items:center;color:white}
+    .brand-icon svg{width:17px}
+    .header-tag{font:500 11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#838b98;display:flex;gap:8px;align-items:center}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#65b996}
+    main{padding-top:45px}
+    .eyebrow{font:500 11px Consolas,'Courier New',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin:0 0 12px}
+    h1{font:700 clamp(31px,4vw,43px)/1.12 Inter,'Segoe UI',sans-serif;letter-spacing:-1.7px;margin:0}
+    .sub{font-size:15px;color:var(--muted);line-height:1.6;margin:12px 0 28px;max-width:650px}
+    .layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(265px,.8fr);gap:18px;align-items:start}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow)}
+    .upload-card{padding:19px}
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px}
+    .section-title{font:700 13px Inter,'Segoe UI',sans-serif;letter-spacing:-.1px}
+    .hint{font:11px 'DM Mono',monospace;color:#969daa}
+    .drop{min-height:190px;border:1.5px dashed #cbd3e1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;transition:.18s;background:#fcfdff;cursor:pointer;outline:none}
+    .drop:hover,.drop:focus-visible,.drop.over{border-color:#6f8fe9;background:#f7f9ff}
+    .upload-icon{width:42px;height:42px;border-radius:12px;background:#edf2ff;color:var(--blue);display:grid;place-items:center;margin-bottom:12px}
+    .upload-icon svg{width:20px;height:20px}
+    .drop strong{font:700 14px Inter,'Segoe UI',sans-serif}
+    .drop span{font-size:12px;color:#8b93a0;margin-top:6px}
+    .browse{color:var(--blue);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+    .formats{margin-top:14px;font:10px 'DM Mono',monospace;color:#9ba2ad;letter-spacing:.035em}
+    #fileInput{display:none}
+    .file-row{display:none;align-items:center;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:9px;background:#fbfcfd;margin-top:12px}
+    .file-badge{width:34px;height:34px;border-radius:9px;background:#edf2ff;color:var(--blue);display:grid;place-items:center;font:700 9px 'DM Mono',monospace}
+    .file-info{min-width:0;flex:1}.file-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file-meta{font:10px 'DM Mono',monospace;color:#9098a5;margin-top:4px}
+    .icon-btn{border:0;background:transparent;color:#828b98;cursor:pointer;padding:5px;border-radius:6px}.icon-btn:hover{background:#f0f2f6;color:var(--ink)}
+    .audio-wrap{display:none;margin-top:13px}audio{width:100%;height:38px}
+    .analyze-btn{width:100%;margin-top:13px;border:0;border-radius:8px;background:var(--blue);color:white;padding:12px 16px;font-weight:700;font-size:13px;cursor:pointer;transition:.15s;display:flex;justify-content:center;align-items:center;gap:9px}
+    .analyze-btn:hover{background:#2857d1}.analyze-btn:disabled{opacity:.55;cursor:wait}
+    .secondary-btn{border:0;background:transparent;color:#6f7887;font-size:11px;font-weight:600;cursor:pointer;padding:11px 12px}.secondary-btn:hover{color:var(--blue)}
+    .actions{display:flex;justify-content:space-between;align-items:center}
+    .side-card{padding:19px 18px 17px}
+    .side-title{font:700 13px Inter,'Segoe UI',sans-serif;margin:0 0 16px}
+    .step{display:grid;grid-template-columns:25px 1fr;gap:10px;margin:15px 0}
+    .step-num{width:23px;height:23px;border-radius:7px;background:#f1f3f7;color:#667080;font:500 10px 'DM Mono',monospace;display:grid;place-items:center}
+    .step h3{font-size:11px;margin:1px 0 4px;font-weight:700}.step p{font-size:11px;line-height:1.5;color:#89919e;margin:0}
+    .note{background:#f7f8fa;border-radius:8px;padding:11px 12px;margin-top:16px;color:#818997;font-size:10px;line-height:1.55}
+    .results{display:none;margin-top:18px}
+    .result-top{padding:18px 20px 17px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
+    .result-kicker{font:500 10px 'DM Mono',monospace;color:#8992a0;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
+    .result-heading{font:700 15px Inter,'Segoe UI',sans-serif;letter-spacing:-.2px}
+    .confidence{background:#eaf7f1;color:#348367;border-radius:20px;padding:6px 9px;font:500 10px 'DM Mono',monospace;white-space:nowrap}
+    .tones{display:grid;grid-template-columns:1fr 1fr;padding:17px 20px 18px;gap:14px}
+    .tone{border:1px solid var(--line);border-radius:10px;padding:14px 15px;position:relative;overflow:hidden}
+    .tone:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
+    .tone.b:before{background:var(--orange)}
+    .tone-label{font:500 10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.11em;color:#8a93a1;display:flex;justify-content:space-between}
+    .tone-hz{font:700 clamp(27px,4vw,37px)/1.2 'DM Mono',monospace;letter-spacing:-1.5px;margin:10px 0 4px;color:#252d3b}
+    .tone-unit{font-size:11px;color:#8a93a1}.tone-duration{font:10px 'DM Mono',monospace;color:#7e8794;margin-top:10px}
+    .wave-wrap{padding:0 20px 18px}
+    .wave-head{display:flex;justify-content:space-between;align-items:center;margin:0 0 9px}.wave-head span:first-child{font:700 11px Inter,'Segoe UI',sans-serif}.wave-head span:last-child{font:10px Consolas,'Courier New',monospace;color:#9aa1ad}
+    .wavebox{height:102px;border:1px solid #edf0f4;border-radius:8px;overflow:hidden;background:#fbfcfe;position:relative}
+    canvas{display:block;width:100%;height:100%}
+    .segment-list{padding:0 20px 19px}
+    .segment-head{font:700 11px Inter,'Segoe UI',sans-serif;margin-bottom:9px}
+    .segment{display:grid;grid-template-columns:32px 1fr auto;gap:9px;align-items:center;border-top:1px solid #f0f1f4;padding:9px 2px;font-size:11px}
+    .segment-index{color:#8a93a1;font:10px 'DM Mono',monospace}.segment-pair{font-weight:600}.segment-time{font:10px 'DM Mono',monospace;color:#838c99}
+    .empty-result{padding:24px;text-align:center;color:#818997;font-size:12px;line-height:1.6}
+    .status{font-size:11px;color:#808a98;text-align:center;min-height:16px;margin-top:9px}
+    .footer{margin-top:24px;text-align:center;font:10px 'DM Mono',monospace;color:#a1a7b1}
+    .footer a{color:#848d9b;text-decoration:none}.footer a:hover{color:var(--blue)}
+    .spin{width:14px;height:14px;border:2px solid #ffffff68;border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:760px){.shell{padding:0 18px 35px}main{padding-top:31px}.layout{grid-template-columns:1fr}.side-card{order:2}.side-card .step{display:inline-grid;width:32%;vertical-align:top}.note{margin-top:5px}.tones{padding-left:14px;padding-right:14px;gap:9px}.tone{padding:12px}.result-top,.wave-wrap,.segment-list{padding-left:15px;padding-right:15px}}
+    @media(max-width:450px){.header-tag{font-size:9px}.side-card .step{width:100%}.drop{min-height:170px}.result-top{align-items:flex-start}.tone-hz{font-size:26px}.hint{font-size:9px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><div class="brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h2l2-6 4 12 3-9 2 6 2-3h3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>twotone</div>
+      <div class="header-tag"><span class="live-dot"></span> QUICK CALL II · AUDIO ANALYZER</div>
+    </header>
+    <main>
+      <p class="eyebrow">Field tool / 01</p>
+      <h1>Find the tones behind the call.</h1>
+      <p class="sub">Drop in a recording and get the Quick Call II pair, in order. The analysis runs in your browser; your audio stays on this device.</p>
+      <div class="layout">
+        <section class="card upload-card" aria-label="Audio upload">
+          <div class="section-head"><span class="section-title">Audio source</span><span class="hint">LOCAL ANALYSIS</span></div>
+          <div class="drop" id="drop" role="button" tabindex="0" aria-label="Choose an audio file">
+            <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <strong>Drop an audio file here</strong>
+            <span>or <span class="browse">browse files</span> from your device</span>
+            <div class="formats">WAV · MP3 · M4A · AAC · OGG · FLAC* · UP TO 100 MB</div>
+          </div>
+          <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac">
+          <div class="file-row" id="fileRow">
+            <div class="file-badge" id="fileBadge">WAV</div>
+            <div class="file-info"><div class="file-name" id="fileName"></div><div class="file-meta" id="fileMeta"></div></div>
+            <button class="icon-btn" id="removeFile" title="Remove audio" aria-label="Remove audio"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 5 10 10M15 5 5 15" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="audio-wrap" id="audioWrap"><audio id="audioPlayer" controls></audio></div>
+          <div class="actions"><button class="secondary-btn" id="sampleBtn">Try a sample pair ↗</button><span class="hint" id="durationHint"></span></div>
+          <button class="analyze-btn" id="analyzeBtn" disabled>Analyze recording <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10h13m-5-5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="status" id="status" aria-live="polite"></div>
+        </section>
+        <aside class="card side-card">
+          <h2 class="side-title">What happens next</h2>
+          <div class="step"><div class="step-num">01</div><div><h3>We scan the recording</h3><p>Short audio frames are checked for steady tones in the Quick Call II range.</p></div></div>
+          <div class="step"><div class="step-num">02</div><div><h3>Order is preserved</h3><p>The first sustained tone is reported as A; the next is tone B.</p></div></div>
+          <div class="step"><div class="step-num">03</div><div><h3>Review every match</h3><p>See measured frequencies, tone lengths, and where each pair appears.</p></div></div>
+          <div class="note">Best results come from a clear recording with the alert tones intact. Voice, clipping, or heavy radio noise can affect the reading.</div>
+        </aside>
+      </div>
+      <section class="card results" id="results" aria-live="polite">
+        <div class="result-top"><div><div class="result-kicker">Analysis complete</div><div class="result-heading" id="resultHeading">Quick Call II pair detected</div></div><div class="confidence" id="confidence">GOOD SIGNAL</div></div>
+        <div id="resultContent"></div>
+      </section>
+      <div class="footer">No upload · no account · <a href="https://www.motorolasolutions.com/content/dam/msi/docs/products/two-way-radios/apx/apx8000xe/apx_8000xe_model_2_user_guide.pdf" target="_blank" rel="noreferrer">Quick Call II reference</a></div>
+    </main>
+  </div>
+<script>
+(()=>{
+  const $=id=>document.getElementById(id), drop=$('drop'), input=$('fileInput'), analyzeBtn=$('analyzeBtn');
+  let file=null, objectUrl=null, audioBuffer=null, sample=false, lastResult=null;
+  const setStatus=s=>$('status').textContent=s;
+  const fmtTime=n=>{const m=Math.floor(n/60),s=n%60;return `${m}:${String(s).padStart(2,'0')}`};
+  function setFile(f){
+    if(!f)return;
+    if(f.size>100*1024*1024){setStatus('That file is over 100 MB. Try a shorter recording.');return}
+    file=f;sample=false;audioBuffer=null;lastResult=null;
+    if(objectUrl)URL.revokeObjectURL(objectUrl);
+    objectUrl=URL.createObjectURL(f);$('audioPlayer').src=objectUrl;
+    $('fileRow').style.display='flex';$('audioWrap').style.display='block';$('fileName').textContent=f.name;
+    const ext=(f.name.split('.').pop()||'AUDIO').toUpperCase();$('fileBadge').textContent=ext.slice(0,4);
+    $('fileMeta').textContent=`${(f.size/1048576).toFixed(2)} MB · LOADING AUDIO…`;
+    $('durationHint').textContent='';analyzeBtn.disabled=false;setStatus('');$('results').style.display='none';
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx){setStatus('This browser does not support local audio analysis.');return}
+    const ctx=new Ctx(); f.arrayBuffer().then(b=>ctx.decodeAudioData(b)).then(buf=>{
+      audioBuffer=buf;$('fileMeta').textContent=`${(f.size/1048576).toFixed(2)} MB · ${buf.numberOfChannels} CH · ${buf.sampleRate.toLocaleString()} HZ`;
+      $('durationHint').textContent=fmtTime(Math.round(buf.duration));
+      return ctx.close();
+    }).catch(()=>{setStatus('Could not read this audio format. Try a WAV or MP3 file.');$('fileMeta').textContent=`${(f.size/1048576).toFixed(2)} MB · AUDIO FORMAT NOT READABLE`;analyzeBtn.disabled=true;ctx.close()});
+  }
+  drop.addEventListener('click',()=>input.click());drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}});
+  input.addEventListener('change',e=>setFile(e.target.files[0]));
+  for(const ev of ['dragenter','dragover'])drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')});
+  for(const ev of ['dragleave','drop'])drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')});
+  drop.addEventListener('drop',e=>setFile(e.dataTransfer.files[0]));
+  $('removeFile').addEventListener('click',()=>{file=null;audioBuffer=null;input.value='';if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=null;$('fileRow').style.display='none';$('audioWrap').style.display='none';$('durationHint').textContent='';analyzeBtn.disabled=true;setStatus('');$('results').style.display='none'});
+  function makeSample(){
+    const sr=24000, a=600.9,b=832.5, durA=1,durB=2.2,gap=.12, total=durA+gap+durB+.2, n=Math.ceil(total*sr), data=new Float32Array(n);
+    for(let i=0;i<n;i++){const t=i/sr;if(t<durA)data[i]=.45*Math.sin(2*Math.PI*a*t);else if(t>=durA+gap&&t<durA+gap+durB)data[i]=.45*Math.sin(2*Math.PI*b*(t-durA-gap))}
+    const Ctx=window.AudioContext||window.webkitAudioContext,ctx=new Ctx();const buf=ctx.createBuffer(1,n,sr);buf.copyToChannel(data,0);audioBuffer=buf;ctx.close();file={name:'sample-qc2-pair.wav',size:0};sample=true;
+    if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=null;$('fileRow').style.display='flex';$('audioWrap').style.display='none';$('fileBadge').textContent='DEMO';$('fileName').textContent='Quick Call II sample pair';$('fileMeta').textContent='SYNTHETIC EXAMPLE · TONE A → TONE B';$('durationHint').textContent=fmtTime(Math.round(total));analyzeBtn.disabled=false;setStatus('A clean sample with known frequencies is ready.');$('results').style.display='none';
+  }
+  $('sampleBtn').addEventListener('click',makeSample);
+  function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]]}}for(let len=2;len<=n;len<<=1){const ang=-2*Math.PI/len,wlenR=Math.cos(ang),wlenI=Math.sin(ang);for(let i=0;i<n;i+=len){let wr=1,wi=0;for(let j=0;j<len/2;j++){const u=i+j,v=i+j+len/2,tr=re[v]*wr-im[v]*wi,ti=re[v]*wi+im[v]*wr;re[v]=re[u]-tr;im[v]=im[u]-ti;re[u]+=tr;im[u]+=ti;const nw=wr*wlenR-wi*wlenI;wi=wr*wlenI+wi*wlenR;wr=nw}}}}
+  function downmix(buf,targetRate=24000){const rate=buf.sampleRate, ratio=rate/targetRate, len=Math.floor(buf.length/ratio),out=new Float32Array(len),chans=Array.from({length:buf.numberOfChannels},(_,i)=>buf.getChannelData(i));for(let i=0;i<len;i++){const p=i*ratio,l=Math.floor(p),frac=p-l;let s=0;for(const c of chans){const x=c[l]||0,y=c[Math.min(l+1,c.length-1)]||0;s+=(x+(y-x)*frac)/chans.length}out[i]=s}return{data:out,rate:targetRate}}
+  function getFrameTone(data,start,size,rate){const re=new Float32Array(size),im=new Float32Array(size);let rms=0;for(let i=0;i<size;i++){const x=data[start+i]||0;rms+=x*x;re[i]=x*(.5-.5*Math.cos(2*Math.PI*i/(size-1)))}rms=Math.sqrt(rms/size);if(rms<.003)return null;fft(re,im);const power=new Float32Array(size/2);for(let i=1;i<power.length;i++)power[i]=re[i]*re[i]+im[i]*im[i];const lo=Math.ceil(280*size/rate),hi=Math.min(Math.floor(2550*size/rate),power.length-2);let k=lo;for(let i=lo+1;i<=hi;i++)if(power[i]>power[k])k=i;const peak=power[k],total=power.slice(lo,hi+1).reduce((a,b)=>a+b,0);if(!peak||peak/total<.28)return null;const l=Math.log(power[k-1]+1e-20),m=Math.log(peak+1e-20),r=Math.log(power[k+1]+1e-20),d=.5*(l-r)/(l-2*m+r);return{k,frequency:(k+d)*rate/size,strength:peak/total,rms}}
+  function analyze(buf){
+    const {data,rate}=downmix(buf);const size=4096,hop=1024,frames=[];
+    if(data.length<size){const padded=new Float32Array(size);padded.set(data);const f=getFrameTone(padded,0,size,rate);if(f)frames.push({time:0,...f});}
+    else for(let p=0;p+size<=data.length;p+=hop){const f=getFrameTone(data,p,size,rate);frames.push(f?{time:(p+size/2)/rate,...f}:null)}
+    // Group frames that hold a steady dominant pitch. Short dropouts are bridged after grouping.
+    const raw=[];let cur=null;
+    for(let i=0;i<frames.length;i++){
+      const f=frames[i];
+      if(!f){if(cur)cur.gaps++;continue}
+      const same=cur&&Math.abs(f.frequency-cur.freqSum/cur.count)<Math.max(6,(cur.freqSum/cur.count)*.0035)&&cur.gaps<=2;
+      if(!same){if(cur)raw.push(cur);cur={start:Math.max(0,f.time-size/(2*rate)),end:f.time+size/(2*rate),freqSum:f.frequency,count:1,strength:f.strength,gaps:0};}
+      else{cur.end=f.time+size/(2*rate);cur.freqSum+=f.frequency;cur.count++;cur.strength=Math.max(cur.strength,f.strength);cur.gaps=0}
+    }
+    if(cur)raw.push(cur);
+    let segs=raw.map(s=>({start:Math.max(0,s.start),end:Math.min(buf.duration,s.end),freq:s.freqSum/s.count,strength:s.strength})).filter(s=>s.end-s.start>=.24);
+    // Merge overlapping estimates around the same physical tone.
+    const merged=[];for(const s of segs){const p=merged[merged.length-1];if(p&&s.start<=p.end+.06&&Math.abs(p.freq-s.freq)<Math.max(6,p.freq*.0035)){const d1=p.end-p.start,d2=s.end-s.start;p.freq=(p.freq*d1+s.freq*d2)/(d1+d2);p.end=Math.max(p.end,s.end);p.strength=Math.max(p.strength,s.strength)}else merged.push({...s})}segs=merged;
+    const pairs=[];for(let i=0;i<segs.length-1;i++){
+      const a=segs[i],b=segs[i+1],gap=b.start-a.end,da=a.end-a.start,db=b.end-b.start;
+      if(gap<=.75&&da>=.25&&db>=.25){pairs.push({a,b,start:a.start,end:b.end,score:Math.min(da,1.4)+Math.min(db,1.5)+a.strength*.2+b.strength*.2})}
+    }
+    pairs.sort((a,b)=>b.score-a.score);
+    return{pairs,segs,duration:buf.duration};
+  }
+  function drawTimeline(canvas,pairs,duration){const dpr=window.devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*dpr;canvas.height=h*dpr;const c=canvas.getContext('2d');c.scale(dpr,dpr);c.clearRect(0,0,w,h);const pad=24,mid=52;c.strokeStyle='#e8ebf1';c.lineWidth=1;c.beginPath();c.moveTo(pad,mid);c.lineTo(w-pad,mid);c.stroke();for(let i=0;i<=4;i++){const x=pad+(w-2*pad)*i/4;c.strokeStyle='#edf0f4';c.beginPath();c.moveTo(x,20);c.lineTo(x,83);c.stroke();c.fillStyle='#9aa2ad';c.font='9px DM Mono, monospace';c.textAlign=i===0?'left':i===4?'right':'center';c.fillText(fmtTime(Math.round(duration*i/4)),x,96)}for(const p of pairs){const x1=pad+(w-2*pad)*p.a.start/duration,x2=pad+(w-2*pad)*p.a.end/duration,x3=pad+(w-2*pad)*p.b.start/duration,x4=pad+(w-2*pad)*p.b.end/duration;c.globalAlpha=.22;c.fillStyle='#3667e8';c.fillRect(x1,35,Math.max(2,x2-x1),34);c.fillStyle='#ed8b49';c.fillRect(x3,35,Math.max(2,x4-x3),34);c.globalAlpha=1;c.fillStyle='#3863cf';c.font='9px DM Mono, monospace';c.textAlign='center';c.fillText('A',x1+(x2-x1)/2,29);c.fillStyle='#d27739';c.fillText('B',x3+(x4-x3)/2,29)}}
+  function showResults(result){const pairs=result.pairs;$('results').style.display='block';if(!pairs.length){$('resultHeading').textContent='No clear tone pair found';$('confidence').textContent='TRY ANOTHER CLIP';$('confidence').style.background='#fff3e9';$('confidence').style.color='#ac6d3b';$('resultContent').innerHTML='<div class="empty-result">We could not find two steady tones in sequence. Try a clearer, longer clip containing both tones, with less voice or background noise.</div>';return}
+    $('confidence').style.background='#eaf7f1';$('confidence').style.color='#348367';$('resultHeading').textContent=pairs.length===1?'Quick Call II pair detected':`${pairs.length} tone pairs detected`;
+    const best=pairs[0];const all=[...pairs].sort((a,b)=>a.start-b.start);
+    const toneCard=(letter,freq,dur,cls)=>`<div class="tone ${cls}"><div class="tone-label"><span>TONE ${letter}</span><span>${letter==='A'?'01':'02'}</span></div><div class="tone-hz">${freq.toFixed(1)}</div><div class="tone-unit">Hertz</div><div class="tone-duration">DETECTED LENGTH &nbsp; ${dur.toFixed(2)} SEC</div></div>`;
+    let html=`<div class="tones">${toneCard('A',best.a.freq,best.a.end-best.a.start,'a')}${toneCard('B',best.b.freq,best.b.end-best.b.start,'b')}</div><div class="wave-wrap"><div class="wave-head"><span>Pair locations</span><span>${pairs.length} ${pairs.length===1?'SEQUENCE':'SEQUENCES'} · ${fmtTime(Math.round(result.duration))} TOTAL</span></div><div class="wavebox"><canvas id="timeline"></canvas></div></div>`;
+    if(pairs.length>1){html+=`<div class="segment-list"><div class="segment-head">All detected sequences</div>${all.map((p,i)=>`<div class="segment"><span class="segment-index">${String(i+1).padStart(2,'0')}</span><span class="segment-pair">A ${p.a.freq.toFixed(1)} Hz <span style="color:#abb1bb">→</span> B ${p.b.freq.toFixed(1)} Hz</span><span class="segment-time">${fmtTime(Math.floor(p.start))} · ${(p.end-p.start).toFixed(1)} s</span></div>`).join('')}</div>`}
+    $('resultContent').innerHTML=html;requestAnimationFrame(()=>drawTimeline($('timeline'),all,result.duration));
+  }
+  analyzeBtn.addEventListener('click',async()=>{if(!audioBuffer)return;analyzeBtn.disabled=true;analyzeBtn.innerHTML='<span class="spin"></span> Scanning tone sequence';setStatus('Finding steady tones and checking their order…');await new Promise(r=>setTimeout(r,40));try{lastResult=analyze(audioBuffer);showResults(lastResult);setStatus(lastResult.pairs.length?'Analysis finished. Pair order is shown as A → B.':'Analysis finished.');$('results').scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){console.error(e);setStatus('Something went wrong reading this recording.')}finally{analyzeBtn.disabled=false;analyzeBtn.innerHTML='Analyze recording <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10h13m-5-5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>'}});
+  window.addEventListener('resize',()=>{const c=$('timeline');if(c&&lastResult?.pairs.length)drawTimeline(c,[...lastResult.pairs].sort((a,b)=>a.start-b.start),lastResult.duration)});
+})();
+</script>
+</body>
+</html>
